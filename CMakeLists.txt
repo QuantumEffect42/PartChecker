@@ -11,7 +11,7 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCv_INCLUDE_DIRS})
 
 #Create executable
-add_executable(PartChecker main.cpp ./Camera/Camera.hpp ./Camera/Camera.cpp)
+add_executable(PartChecker main.cpp ./Camera/Camera.hpp ./Camera/Camera.cpp ./Algorithms/Algorithms.hpp ./Algorithms/Algorithms.cpp)
 
 #link OpenCV libraries
 target_link_libraries(PartChecker ${OpenCV_LIBS})

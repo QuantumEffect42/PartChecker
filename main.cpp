@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "Camera/Camera.hpp"
+#include "Algorithms/Algorithms.hpp"
 
 using namespace std;
 
@@ -11,6 +12,7 @@ using namespace std;
 int main(){
 
     Camera camera;
+    Algorithms algoirthm;
 
     std::optional<cv::Mat> image = camera.CaptureGreyImage();
 
@@ -19,12 +21,14 @@ int main(){
     }
     else{
         cv::Mat imageMat = image.value();
-        cv::imshow("Captured Image", imageMat);
+        // cv::imshow("Captured Image", imageMat);
 
-        std::cout << "Type of Mat: " << imageMat.type() << std::endl;
-        std::cout << "Image value at index: 17, 17: " << (int)imageMat.at<unsigned char>(17, 17) << std::endl;
-        std::cout << "Image Mat size " << imageMat.size() << std::endl;
-        cv::waitKey(0);
+        // std::cout << "Type of Mat: " << imageMat.type() << std::endl;
+        // std::cout << "Image value at index: 17, 17: " << (int)imageMat.at<unsigned char>(17, 17) << std::endl;
+        // std::cout << "Image Mat size " << imageMat.size() << std::endl;
+        // cv::waitKey(0);
+
+        algoirthm.templateCreate(imageMat);
     }
 
     return 0;
