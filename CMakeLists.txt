@@ -8,10 +8,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(OpenCV REQUIRED)
 
 #includ libraries from OpenCV
-include_directories(${OpenCv_INCLUDE_DIRS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 #Create executable
-add_executable(PartChecker main.cpp ./Camera/Camera.hpp ./Camera/Camera.cpp ./Algorithms/Algorithms.hpp ./Algorithms/Algorithms.cpp)
+add_executable(PartChecker main.cpp ./Camera/Camera.hpp ./Camera/Camera.cpp ./Algorithms/Algorithms.hpp ./Algorithms/Algorithms.cpp ./Part/Part.cpp ./Part/Part.hpp ./Part/Cutout/Cutout.cpp ./Part/Cutout/Cutout.hpp)
 
 #link OpenCV libraries
 target_link_libraries(PartChecker ${OpenCV_LIBS})
