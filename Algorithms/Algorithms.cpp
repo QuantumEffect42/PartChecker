@@ -20,36 +20,51 @@ int Algorithms::templateCreate(Mat image){
 
 //If we assume we are scanning the image left to right, top to bottom then we 
 int** Algorithms::edgeScan(Mat image){
-    // const int width = image.cols;
-    // const int height = image.rows;
+    const int width = image.cols;
+    const int height = image.rows;
 
-    const int width = sizeof(testArray[0]) / sizeof(int);
-    const int height = sizeof (testArray) / sizeof(testArray[0]);
+    // for(int i = 0; i < height; i++){
+    //     for(int j = 0; j < width; j++){
+    //         std::cout << (int)image.at<unsigned char>(i, j) << ", ";
+    //     }
+    //     std::cout << std::endl;
+    // }
+
+    // std::cout << std::endl;
+
+    // const int width = sizeof(testArray[0]) / sizeof(int);
+    // const int height = sizeof (testArray) / sizeof(testArray[0]);
+
+    for(int i = 0; i < width; i++){
+        std::cout << i - 1 << ", ";
+    }
+    std::cout << std::endl;
 
     int** checkArray = createArray(width, height);
 
     //NOTE: j is the horizontal index, and i is the vertical index
     for(int i = 0; i < height; i++){
-        for(int j = 0; j < width; j++){
+        std::cout << i << ": ";
 
+        for(int j = 0; j < width; j++){
             int rightPixelValue = -1;
             int belowPixelValue = -1;
 
             //TODO: Add checks here to ensure that we skip over marked nodes if they are already in the 2D array
             //make sure that we're not at the right edge of the image
             if((j + 1) < width && checkArray[i][j+1] == 0){
-                // rightPixelValue = (int)image.at<unsigned char>(i, j+1);
-                rightPixelValue = testArray[i][j+1];
+                rightPixelValue = (int)image.at<unsigned char>(i, j+1);
+                // rightPixelValue = testArray[i][j+1];
             }
 
             //make sure that we're not at the bottom edge of the image
             if((i + 1) < height && checkArray[i+1][j] == 0){
-                // belowPixelValue = (int)image.at<unsigned char>(i+1, j);
-                belowPixelValue = testArray[i+1][j];
+                belowPixelValue = (int)image.at<unsigned char>(i+1, j);
+                // belowPixelValue = testArray[i+1][j];
             }
 
-            // int currentPixelValue = (int)image.at<unsigned char>(i, j);
-            int currentPixelValue = testArray[i][j];
+            int currentPixelValue = (int)image.at<unsigned char>(i, j);
+            // int currentPixelValue = testArray[i][j];
 
             if(rightPixelValue != -1){
                 if((currentPixelValue - rightPixelValue) > 0 && (currentPixelValue - rightPixelValue) > difference){
@@ -76,39 +91,116 @@ int** Algorithms::edgeScan(Mat image){
 
             std::cout << checkArray[i][j] << ", ";
         }
-
         std::cout << std::endl;
     }
+
+    cutoutDetect(checkArray, width, height);
 
     return checkArray;
 }
 
 /**
- * 8 possible directions of travel between pixels (right, left, up, down, UR, UL, DR, DL)
- * Each of these directions will be associated with a value (2, 4, 5, 3, 8, 9, 6, 7) respectively
- * These directions can then be used to measure the points to their respective frame edges.
- * Direction change points will then be marked with a value 10 so they can be checked against both 
- * the left and top frame edges
+ * This function is responsible for creating a new part object which will hold all the information
+ * about the cutouts and their edge information as well as keep a count of the total number of cutouts
+ * detected in the scanned part. The x and y position of the edge pixel will be given to the cutout for
+ * easy computation of the distance to and from the edges
  * 
- * This function will need to detect corners to be used in measuring the distances to the frame edges
- * The corners will be marked since we need to test the positions of each corner against the left and top 
- * frame edges.
- * 
- * This function will do the following:
- *  - Scan the array until an edge if found
- *  - It will latch onto the edge pixel and follow the edge until the next pixel is a 0
- *  - It will then mark the pixel it found the potential edge change at and follow the edge further
- *      - If there the cardinal direction changes within a specified distance, for a specified distance, 
- *      - mark the middle point as a edge change
- *      - If the cardinal direction goes back to normal within a specified distance, continue marking as normal
- *  - Once an edge has been completely followed, continue the search and skip over marked pixels
- * 
- * PROBLEMS THAT STILL NEED SOLVING
- *  - Long Curves (May need to be a special case)
- * 
+ * This function will work by scanning the array with the marked edges to until an edge is found. Once an edge
+ * is found, it will be followed until the starting point is reached again. Once this the entire cutout has
+ * been traced, it will resume searching until the next one is found. This will ensure that all the cutouts are
+ * accounted for
  */
-void Algorithms::cornerDetect(int** markedArray){
+void Algorithms::cutoutDetect(int** markedArray, int width, int height){
+    Part part;
 
+    std::tuple<int, int> edgePoint;
+
+    for(int i = 0; i < height; i++){
+        for(int j = 0; j < width; j++){
+
+            //if we find part of the edge of a cutout
+            if(markedArray[i][j] == 1){
+                std::tuple<int, int> currentPoint = std::make_tuple(j, i);
+
+                std::shared_ptr<Cutout> cutout(new Cutout);
+                cutout->addPointToEdge(j, i);
+                
+                while(true){
+                    markedArray[std::get<1>(currentPoint)][std::get<0>(currentPoint)] = 2;
+
+                    //check right
+                    if(!((std::get<0>(currentPoint)+1) >= width) && markedArray[std::get<1>(currentPoint)][std::get<0>(currentPoint) + 1] == 1){
+                        std::get<0>(currentPoint) = std::get<0>(currentPoint) + 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    //check down
+                    else if(!((std::get<1>(currentPoint)+1) >= height) && markedArray[std::get<1>(currentPoint) + 1][std::get<0>(currentPoint)] == 1){
+                        std::get<1>(currentPoint) = std::get<1>(currentPoint) + 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    //check left
+                    else if(!((std::get<0>(currentPoint)-1) <= 0) && markedArray[std::get<1>(currentPoint)][std::get<0>(currentPoint) - 1] == 1){
+                        std::get<0>(currentPoint) = std::get<0>(currentPoint) - 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    //check top
+                    else if(!((std::get<1>(currentPoint)-1) <= 0) && markedArray[std::get<1>(currentPoint) - 1][std::get<0>(currentPoint)] == 1){
+                        std::get<1>(currentPoint) = std::get<1>(currentPoint) - 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    //check down-right
+                    else if(!((std::get<0>(currentPoint)+1) >= width) && !((std::get<1>(currentPoint)+1) >= height) && markedArray[std::get<1>(currentPoint) + 1][std::get<0>(currentPoint) + 1] == 1){
+                        std::get<0>(currentPoint) = std::get<0>(currentPoint) + 1;
+                        std::get<1>(currentPoint) = std::get<1>(currentPoint) + 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    //check down-left
+                    else if(!((std::get<0>(currentPoint)-1) <= 0) && !((std::get<1>(currentPoint)+1) >= height) && markedArray[std::get<1>(currentPoint) + 1][std::get<0>(currentPoint) - 1] == 1){
+                        std::get<0>(currentPoint) = std::get<0>(currentPoint) - 1;
+                        std::get<1>(currentPoint) = std::get<1>(currentPoint) + 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    //check top-left
+                    else if(!((std::get<0>(currentPoint)-1) <= 0) && !((std::get<1>(currentPoint)-1) <= 0) && markedArray[std::get<1>(currentPoint) - 1][std::get<0>(currentPoint) - 1] == 1){
+                        std::get<0>(currentPoint) = std::get<0>(currentPoint) - 1;
+                        std::get<1>(currentPoint) = std::get<1>(currentPoint) - 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    //check top-right
+                    else if(!((std::get<0>(currentPoint)+1) >= width) && !((std::get<1>(currentPoint)-1) <= 0) && markedArray[std::get<1>(currentPoint) - 1][std::get<0>(currentPoint) + 1] == 1){
+                        std::get<0>(currentPoint) = std::get<0>(currentPoint) + 1;
+                        std::get<1>(currentPoint) = std::get<1>(currentPoint) - 1;
+
+                        cutout->addPointToEdge(std::get<0>(currentPoint), std::get<1>(currentPoint));
+                    }
+                    else{
+                        break;
+                    }
+                }
+
+                std::cout << "edgePoints size: " << cutout->getEdgePoints().size() << std::endl;
+                cutout->toString();
+
+                part.addCutout(cutout);
+            }
+        }
+    }
+
+    std::cout << "Part cutout count: " << part.getCutoutSize() << std::endl;
+
+    // for(int i = 0; i < height; i++){
+    //     for(int j = 0; j < width; j++){
+    //         std::cout << markedArray[i][j] << ", ";
+    //     }
+    //     std::cout << std::endl;
+    // }
 }
 
 int** Algorithms::createArray(int width, int height){
