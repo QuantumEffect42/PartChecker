@@ -14,22 +14,36 @@ int main(){
     Camera camera;
     Algorithms algoirthm;
 
-    std::optional<cv::Mat> image = camera.CaptureGreyImage();
+    std::string imagePath = "./Images/Test_Image_2.png";
 
-    if(!image.has_value()){
-        return -1;
-    }
-    else{
-        cv::Mat imageMat = image.value();
-        // cv::imshow("Captured Image", imageMat);
+    // std::optional<cv::Mat> image = camera.CaptureGreyImage();
 
-        // std::cout << "Type of Mat: " << imageMat.type() << std::endl;
-        // std::cout << "Image value at index: 17, 17: " << (int)imageMat.at<unsigned char>(17, 17) << std::endl;
-        // std::cout << "Image Mat size " << imageMat.size() << std::endl;
-        // cv::waitKey(0);
+    // if(!image.has_value()){
+    //     return -1;
+    // }
+    // else{
+    //     cv::Mat imageMat = image.value();
+    //     cv::imshow("Captured Image", imageMat);
 
-        algoirthm.templateCreate(imageMat);
-    }
+    //     std::cout << "Type of Mat: " << imageMat.type() << std::endl;
+    //     std::cout << "Image value at index: 17, 17: " << (int)imageMat.at<unsigned char>(17, 17) << std::endl;
+    //     std::cout << "Image Mat size " << imageMat.size() << std::endl;
+    //     cv::waitKey(0);
+
+    //     algoirthm.templateCreate(imageMat);
+    // }
+
+    cv::Mat image = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
+
+    std::cout << "Type of Mat: " << image.type() << std::endl;
+    std::cout << "Image Mat size " << image.size() << std::endl;
+    std::cout << "Image value at index: 17, 17: " << (int)image.at<unsigned char>(17, 17) << std::endl;
+
+    algoirthm.templateCreate(image);
+
+    cv::imshow("Test Window", image);
+
+    cv::waitKey(0);
 
     return 0;
 }
