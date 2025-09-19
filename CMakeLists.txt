@@ -11,7 +11,7 @@ find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
 #Create executable
-add_executable(PartChecker main.cpp ./Camera/Camera.hpp ./Camera/Camera.cpp ./Algorithms/Algorithms.hpp ./Algorithms/Algorithms.cpp ./Part/Part.cpp ./Part/Part.hpp ./Part/Cutout/Cutout.cpp ./Part/Cutout/Cutout.hpp)
+add_executable(PartChecker main.cpp ./Camera/Camera.hpp ./Camera/Camera.cpp ./Algorithms/Algorithms.hpp ./Algorithms/Algorithms.cpp ./Part/Part.cpp ./Part/Part.hpp ./Part/Cutout/Cutout.cpp ./Part/Cutout/Cutout.hpp ./Algorithms/Sobel.cpp ./Algorithms/Sobel.hpp)
 
 #link OpenCV libraries
 target_link_libraries(PartChecker ${OpenCV_LIBS})

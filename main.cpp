@@ -3,6 +3,7 @@
 
 #include "Camera/Camera.hpp"
 #include "Algorithms/Algorithms.hpp"
+#include "Algorithms/Sobel.hpp"
 
 using namespace std;
 
@@ -13,6 +14,7 @@ int main(){
 
     Camera camera;
     Algorithms algoirthm;
+    algorithms::Sobel sobel;
 
     std::string imagePath = "./Images/Test_Image_2.png";
 
@@ -33,17 +35,19 @@ int main(){
     //     algoirthm.templateCreate(imageMat);
     // }
 
-    cv::Mat image = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
+    // cv::Mat image = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
 
-    std::cout << "Type of Mat: " << image.type() << std::endl;
-    std::cout << "Image Mat size " << image.size() << std::endl;
-    std::cout << "Image value at index: 17, 17: " << (int)image.at<unsigned char>(17, 17) << std::endl;
+    // std::cout << "Type of Mat: " << image.type() << std::endl;
+    // std::cout << "Image Mat size " << image.size() << std::endl;
+    // std::cout << "Image value at index: 17, 17: " << (int)image.at<unsigned char>(17, 17) << std::endl;
 
-    algoirthm.templateCreate(image);
+    // algoirthm.templateCreate(image);
 
-    cv::imshow("Test Window", image);
+    // cv::imshow("Test Window", image);
 
-    cv::waitKey(0);
+    // cv::waitKey(0);
+
+    sobel.edgeDetect();
 
     return 0;
 }

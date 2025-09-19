@@ -10,6 +10,8 @@ class Part{
         ~Part();
         void addCutout(std::shared_ptr<Cutout>);
         int getCutoutSize();
+        bool testInSpec(Part, int);
+        void coalesce();
 
     private:
         int cutoutCount;
